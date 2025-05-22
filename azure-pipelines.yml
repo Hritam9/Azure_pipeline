@@ -1,0 +1,11 @@
+trigger:
+  branches:
+    include:
+      - main  # Adjust if your branch is different
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - script: echo "Hello Hritam"
+    displayName: 'Print Greeting'
