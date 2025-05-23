@@ -18,15 +18,12 @@ stages:
 
     - script: |
         echo "Installing Terraform v${terraformVersion}..."
+        sudo apt-get update -y
+        sudo apt-get install -y wget unzip
 
-        # Download Terraform zip
-        curl -O https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip
-
-        # Unzip and move binary
+        wget https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip
         unzip terraform_${terraformVersion}_linux_amd64.zip
         sudo mv terraform /usr/local/bin/
-
-        # Verify install
         terraform version
       displayName: 'Install Terraform'
 
