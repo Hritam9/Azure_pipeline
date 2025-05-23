@@ -17,14 +17,16 @@ stages:
     - checkout: self
 
     - script: |
-        echo "Installing Terraform..."
-        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl unzip
-        curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o hashicorp.gpg
-        sudo install -o root -g root -m 644 hashicorp.gpg /usr/share/keyrings/
-        sudo tee /etc/apt/sources.list.d/hashicorp.list <<EOF
-        deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main
-        EOF
-        sudo apt-get update && sudo apt-get install terraform=$(terraformVersion)
+        echo "Installing Terraform v${terraformVersion}..."
+
+        # Download Terraform zip
+        curl -O https://releases.hashicorp.com/terraform/${terraformVersion}/terraform_${terraformVersion}_linux_amd64.zip
+
+        # Unzip and move binary
+        unzip terraform_${terraformVersion}_linux_amd64.zip
+        sudo mv terraform /usr/local/bin/
+
+        # Verify install
         terraform version
       displayName: 'Install Terraform'
 
