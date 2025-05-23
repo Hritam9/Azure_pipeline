@@ -9,12 +9,6 @@ pool:
 variables:
   terraformVersion: '1.6.6'
 
-  # These secrets are stored securely in Azure DevOps Variables or Variable Group
-  subscription_id: $(subscription_id)
-  client_id: $(client_id)
-  client_secret: $(client_secret)
-  tenant_id: $(tenant_id)
-
 stages:
 - stage: Terraform
   jobs:
@@ -22,17 +16,23 @@ stages:
     steps:
     - checkout: self
 
-    - task: UseTerraform@0
-      inputs:
-        terraformVersion: $(terraformVersion)
+    - script: |
+        echo "Installing Terraform..."
+        sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl unzip
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o hashicorp.gpg
+        sudo install -o root -g root -m 644 hashicorp.gpg /usr/share/keyrings/
+        sudo tee /etc/apt/sources.list.d/hashicorp.list <<EOF
+        deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main
+        EOF
+        sudo apt-get update && sudo apt-get install terraform=$(terraformVersion)
+        terraform version
+      displayName: 'Install Terraform'
 
     - script: |
-        echo "Initializing Terraform..."
         terraform init -input=false
       displayName: 'Terraform Init'
 
     - script: |
-        echo "Running Terraform Plan..."
         terraform plan \
           -var "subscription_id=$(subscription_id)" \
           -var "client_id=$(client_id)" \
@@ -44,6 +44,5 @@ stages:
       displayName: 'Terraform Plan'
 
     - script: |
-        echo "Applying Terraform..."
         terraform apply -input=false -auto-approve tfplan
       displayName: 'Terraform Apply'
